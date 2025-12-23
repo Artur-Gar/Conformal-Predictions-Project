@@ -1,4 +1,3 @@
-"""
 # risk_control_conformal
 
 This folder implements **distribution-free risk control** (Learn-Then-Test / LTT) for **multi-label prediction sets** on top of the upstream NIH Chest X-ray classifier in `../upstream_xray_classifier`.

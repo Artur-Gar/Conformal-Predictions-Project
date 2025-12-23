@@ -1,4 +1,3 @@
-"""
 # NIH Chest X-ray multi-label baseline (ResNet-50)
 
 This classification baseline is adapted from the original GitHub repository:

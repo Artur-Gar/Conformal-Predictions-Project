@@ -1,4 +1,3 @@
-"""
 # Conformal Predictions Research
 
 This repository contains experiments with **conformal prediction** methods for two settings:
@@ -14,5 +13,3 @@ This repository contains experiments with **conformal prediction** methods for t
   See `regression/README.md` for setup, runs, and outputs.
 
 Each folder is self-contained and includes its own README with commands and results.
-
-"""
