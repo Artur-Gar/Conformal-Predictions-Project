@@ -1,0 +1,1 @@
+./.venv/Scripts/python.exe risk_control_conformal/predict_one_image.py --ckpt stage2_0001_08.pth --image_name Atelectasis.png
