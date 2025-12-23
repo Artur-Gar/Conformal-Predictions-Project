@@ -1,0 +1,1 @@
+./.venv/Scripts/python.exe risk_control_conformal/risk_control.py --ckpt stage2_0001_08.pth --alpha 0.1 --delta 0.1 --num_splits 100

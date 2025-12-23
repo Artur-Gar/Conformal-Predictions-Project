@@ -1,0 +1,13 @@
+# Python / venv 
+.venv/
+**/__pycache__/
+**/*.py[cod]
+**/.pytest_cache/
+
+# Ignore everything inside any "models" and "images" folders
+**/models/*
+**/images/*
+
+# But keep the directories themselves (requires a placeholder file)
+!**/models/.gitkeep
+!**/images/.gitkeep
