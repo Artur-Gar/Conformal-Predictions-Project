@@ -5,13 +5,6 @@ This module contains two parts:
 - **`upstream_xray_classifier/`** — the baseline **multi-label chest X-ray classifier** (ResNet50, trained with Focal Loss).  
 - **`risk_control_conformal/`** — **distribution-free risk control** (Learn-Then-Test / LTT) on top of the classifier, selecting a threshold $\lambda$ to control **False Discovery Rate (FDR)** for multi-label prediction sets.
 
-## Quick start
-
-Install dependencies (from `classification/`):
-```bash
-pip install -r requirements.txt
-```
-
 ---
 
 ## Workflow
