@@ -9,7 +9,7 @@ from statsmodels.tsa.statespace.exponential_smoothing import ExponentialSmoothin
 from statsmodels.tsa.statespace.sarimax import SARIMAX
 import math
 import time as time
-import utils_EnbPI as util
+from . import utils_EnbPI as util
 import warnings
 warnings.filterwarnings("ignore")
 

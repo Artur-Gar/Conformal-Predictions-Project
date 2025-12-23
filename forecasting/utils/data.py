@@ -4,7 +4,7 @@ import numpy as np
 import warnings
 import torch
 import pickle
-import utils_EnbPI
+from . import utils_EnbPI
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import OneHotEncoder
 import os
@@ -16,64 +16,25 @@ class real_data_loader():
         pass
 
     def get_data(self, data_name, solar_args=None, wind_args=None):
-        if data_name == 'solar':
-            # Get solar data WITH time t as covariate
-            univariate, filter_zero, non_stat_solar = solar_args
-            Y_full, X_full_old, X_full_nonstat = self.get_non_stationary_solar(
-                univariate=univariate, filter_zero=filter_zero)
-            if non_stat_solar:
-                X_full = X_full_nonstat
-            else:
-                X_full = X_full_old
         if data_name == 'electric':
             X_full, Y_full = self.electric_dataset()
-        if data_name == 'wind':
-            wind_loc = wind_args[0]
-            X_full, Y_full = self.get_wind_real(location=wind_loc)
+        # if data_name == 'solar':
+        #     # Get solar data WITH time t as covariate
+        #     univariate, filter_zero, non_stat_solar = solar_args
+        #     Y_full, X_full_old, X_full_nonstat = self.get_non_stationary_solar(
+        #         univariate=univariate, filter_zero=filter_zero)
+        #     if non_stat_solar:
+        #         X_full = X_full_nonstat
+        #     else:
+        #         X_full = X_full_old
+        # if data_name == 'wind':
+        #     wind_loc = wind_args[0]
+        #     X_full, Y_full = self.get_wind_real(location=wind_loc)
         return X_full, Y_full
 
-    def get_wind_real(self, location=0):
-        # Stationary real
-        rootpath = 'Data/data_k30'
-        wind = np.load(os.path.join(rootpath, 'sample_wind.npy'))
-        # len-T vector, denoting wind speed
-        speeds = wind[:, location, 1]
-        data_y = speeds
-        print(f'Shape of full data at location {location}')
-        print(data_y.shape)
-        data_x = rolling(data_y, window=10)
-        N = len(data_x)
-        return data_x, data_y[-N:]
 
-    def get_non_stationary_solar(self, univariate=True, max_N=2000, filter_zero=False):
-        # Stationary real
-        data = utils_EnbPI.read_data(3, 'Data/Solar_Atl_data.csv', 10000)
-        data_y = data['DHI'].to_numpy()  # Convert to numpy
-        if univariate:
-            # Univariate feature
-            data_x_old = rolling(data_y, window=20)
-        else:
-            # Multivariate feature
-            data_x_old = data.loc[:, data.columns
-                                  != 'DHI'].to_numpy()  # Convert to numpy
-        # Add one-hot-encoded DAY features using // (or hour features using %)
-        hours = int(data_y.shape[0]/365)
-        N = data_x_old.shape[0]
-        day_feature = False
-        if day_feature:
-            # Day one-hot 0,...,364
-            one_hot_feature = (np.arange(N) // hours).reshape(-1, 1)
-        else:
-            # Hourly one-hot 0,...,23
-            one_hot_feature = (np.arange(N) % hours).reshape(-1, 1)
-        one_hot_feature = OneHotEncoder().fit_transform(one_hot_feature).toarray()
-        data_x_new = np.c_[one_hot_feature, data_x_old]
-        data_y, data_x_old, data_x_new = data_y[-max_N:
-                                                ], data_x_old[-max_N:], data_x_new[-max_N:]
-        if filter_zero:
-            nonzero_idx = data_y > 0.2
-            data_y, data_x_old, data_x_new = data_y[nonzero_idx], data_x_old[nonzero_idx], data_x_new[nonzero_idx]
-        return data_y, data_x_old, data_x_new
+
+
 
     def electric_dataset(self):
         # ELEC2 data set

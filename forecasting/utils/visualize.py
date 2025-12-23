@@ -1,10 +1,10 @@
-import utils_SPCI as utils
+from . import utils_SPCI as utils
 import calendar
 import matplotlib.pyplot as plt
 import seaborn as sns
 from statsmodels.tsa.stattools import pacf
 import numpy as np
-import data
+from . import data
 import pandas as pd
 import warnings
 import torch
@@ -99,7 +99,7 @@ def plot_burn_in(PIs_ls, Ytest, window_size, savename, use_NeuralProphet=False):
 wind_loc = 0
 
 
-def plot_rolling(alpha, train_frac, non_stat_solar=True, dsets=['wind', 'solar', 'electric']):
+def plot_rolling(alpha, train_frac, non_stat_solar=True, dsets=['electric']):
     if 'simulate' in dsets[0]:
         make_plot = False
         methods = ['SPCI', 'EnbPI']
@@ -118,11 +118,6 @@ def plot_rolling(alpha, train_frac, non_stat_solar=True, dsets=['wind', 'solar',
             print(f'{name} on {data_name}')
             if make_plot:
                 dloader = data.real_data_loader()
-                univariate, filter_zero, non_stat_solar = False, False, True
-                solar_args = [univariate, filter_zero, non_stat_solar]
-                wind_args = [wind_loc]
-                X_full, Y_full = dloader.get_data(
-                    data_name, solar_args, wind_args)
             else:
                 simul_name_dict = {1: 'simulation_state_space',
                                    2: 'simulate_nonstationary', 3: 'simulate_heteroskedastic'}
@@ -194,85 +189,7 @@ def plot_rolling(alpha, train_frac, non_stat_solar=True, dsets=['wind', 'solar',
     return full_cov_width_table
 
 
-def residual_histogram_pacf_cond_cov():
-    # NOTE: one major difference from before is that the training data ONLY come from certain hours
-    dloader = data.real_data_loader()
-    Y_full, X_full, _ = dloader.get_non_stationary_solar(
-        univariate=False, max_N=8760)
-    idx_choose = []
-    hours = [7, 8, 15, 16, 17]  # Actual hours - 1
-    stride = len(hours)
-    for h in hours:
-        idx = np.arange(365) * 24 + h
-        idx_choose.append(idx)
-    Y_full = Y_full[np.concatenate(idx_choose)]
-    X_full = X_full[np.concatenate(idx_choose)]
-    Y_full, X_full = torch.from_numpy(Y_full).float().to(
-        device), torch.from_numpy(X_full).float().to(device)
-    train_length = 183
-    train_frac = train_length / 365
-    N = int(X_full.shape[0] * train_frac)
-    X_train, X_predict, Y_train, Y_predict = X_full[:
-                                                    N], X_full[N:], Y_full[:N], Y_full[N:]
-    fit_func = RandomForestRegressor(n_estimators=20, criterion='mse',
-                                     bootstrap=False, max_depth=2, n_jobs=-1)
-    EnbPI = SPCI.SPCI_and_EnbPI(
-        X_train, X_predict, Y_train, Y_predict, fit_func=fit_func)
-    EnbPI.fit_bootstrap_models_online(B=50, fit_sigmaX=False)
-    # Plot residual and pacf
-    plot_resid_and_pacf(EnbPI)
-    for use_SPCI in [False, True]:
-        mtd = 'SPCI' if use_SPCI else 'EnbPI'
-        print(f'################ Using {mtd} ################')
-        alpha = 0.1
-        smallT = not use_SPCI
-        past_window = 300
-        EnbPI.compute_PIs_Ensemble_online(
-            alpha, smallT=smallT, past_window=past_window, stride=stride, use_SPCI=use_SPCI)
-        # Plot cond coverage
-        titles = ['8', '9', '16', '17']
-        fig, ax = plt.subplots(1, 4, figsize=(4 * 8, 4), sharex=True,
-                               sharey=True, constrained_layout=True)
-        PIs = EnbPI.PIs_Ensemble
-        Y_pred = EnbPI.Ensemble_pred_interval_centers.cpu().numpy()
-        Y_true = EnbPI.Y_predict.cpu().numpy()
-        titlesize = 28
-        for h in range(4):
-            current_figure = ax[h]
-            plot_length = 365 - train_length
-            idx = np.arange(plot_length) * len(hours) + h
-            PIs_h = PIs.iloc[idx, :]
-            Y_pred_h = Y_pred[idx]
-            Y_true_h = Y_true[idx]
-            mean_cov = ((Y_true_h >= PIs_h['lower']) & (
-                Y_true_h <= PIs_h['upper'])).mean()
-            mean_width = (PIs_h['upper'] - PIs_h['lower']).mean()
-            mean_cov, mean_width = np.round(
-                mean_cov, 2), np.round(mean_width, 2)
-            x_axis = np.arange(plot_length)
-            current_figure.plot(Y_pred_h, color='red', linewidth=0.7)
-            current_figure.scatter(
-                x_axis, Y_true_h, marker='.', s=4, color='black')
-            xticks = np.linspace(0, plot_length, 3).astype(int)  #
-            xtick_labels = [calendar.month_name[int(i / 31) + int(train_length / 30) + 1]
-                            for i in xticks]  # Get months, start from April
-            current_figure.set_xticks(xticks)
-            current_figure.set_xticklabels(xtick_labels, fontsize=titlesize)
-            current_figure.set_title(
-                f'At {titles[h]}:00 \n Coverage: {mean_cov} & Width: {mean_width}')
-            current_figure.tick_params(
-                axis='x', rotation=15, labelsize=titlesize)
-            lower_vals = np.maximum(0, PIs_h['lower']).to_numpy()
-            upper_vals = np.maximum(0, PIs_h['upper']).to_numpy()
-            current_figure.fill_between(
-                x_axis, lower_vals, upper_vals, alpha=0.3)
-        cq = 'CondQuantile' if use_SPCI else 'NoCondQuantile'
-        plt.savefig(f'Cond_coverage_{cq}.png', dpi=300,
-                    bbox_inches='tight',
-                    pad_inches=0)
-        plt.show()
-        plt.close()
-        plt.close()
+
 
 
 def plot_resid_and_pacf(EnbPI):

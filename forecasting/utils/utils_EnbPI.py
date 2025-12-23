@@ -10,7 +10,7 @@ import pandas as pd
 import numpy as np
 import math
 from scipy.sparse import random
-import PI_class_EnbPI as EnbPI  # For me
+from . import PI_class_EnbPI as EnbPI  # For me
 import matplotlib.cm as cm
 # from keras.layers import LSTM, Dense, Dropout
 # from keras.models import Sequential
@@ -19,7 +19,7 @@ import calendar
 import matplotlib.transforms as transforms
 import importlib
 import sys
-importlib.reload(sys.modules['PI_class_EnbPI'])  # For me
+importlib.reload(sys.modules['utils.PI_class_EnbPI'])  # For me
 titlesize = 20
 plt.rcParams.update({'axes.labelsize': titlesize-2, 'axes.titlesize': titlesize,
                     'legend.fontsize': titlesize-2, 'xtick.labelsize': titlesize-4, 'ytick.labelsize': titlesize-4})
