@@ -12,6 +12,7 @@ This repository contains experiments with **conformal prediction** methods for t
 - `regression/` — conformal prediction for regression (time-series) experiments  
   See `regression/README.md` for setup, runs, and outputs.
 
-- `Project Report.pdf` - outlines the theoretical basis and presents a comprehensive overview of the project.
-
 Each folder is self-contained and includes its own README with commands and results.
+
+## Report
+[research_report.pdf](research_report.pdf) - outlines the theoretical basis and presents a comprehensive overview of the research and the results.
